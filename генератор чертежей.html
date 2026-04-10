@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чертеж металлической опоры и трубы</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px;
+            background: #2c3e50;
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px 10px 0 0;
+            overflow: hidden;
+        }
+        
+        .tab {
+            padding: 15px 25px;
+            background: #ecf0f1;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .tab.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 25px;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab-content.active {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        .input-panel {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        button {
+            padding: 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        .drawing-container {
+            flex: 2;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        #drawingCanvas, #pipeCanvas {
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            margin-top: 20px;
+            max-width: 100%;
+        }
+        
+        .dimensions {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .dimension-box {
+            background: #e8f4fc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .dimension-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            width: 100%;
+        }
+        
+        .button-group button {
+            flex: 1;
+        }
+        
+        .download-btn {
+            background: #27ae60;
+        }
+        
+        .download-btn:hover {
+            background: #219653;
+        }
+        
+        .reset-btn {
+            background: #e74c3c;
+        }
+        
+        .reset-btn:hover {
+            background: #c0392b;
+        }
+        
+        .info-panel {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .filename-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .filename-modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .modal-buttons button {
+            flex: 1;
+        }
+        
+        .cancel-btn {
+            background: #95a5a6;
+        }
+        
+        .cancel-btn:hover {
+            background: #7f8c8d;
+        }
+        
+        @media (max-width: 768px) {
+            .tab-content.active {
+                flex-direction: column;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Генератор чертежей металлоконструкций</h1>
+            <p>Выберите тип конструкции и введите параметры</p>
+        </header>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="support">Опора</div>
+            <div class="tab" data-tab="pipe">Труба</div>
+        </div>
+        
+        <div class="tab-content active" id="support-tab">
+            <div class="input-panel">
+                <h2>Параметры опоры</h2>
+                <div class="input-group">
+                    <label for="length">Длина (мм):</label>
+                    <input type="number" id="length" placeholder="Введите длину" value="1000" min="100" max="5000">
+                </div>
+                
+                <div class="input-group">
+                    <label for="height">Высота (мм):</label>
+                    <input type="number" id="height" placeholder="Введите высоту" value="800" min="100" max="3000">
+                </div>
+                
+                <div class="input-group">
+                    <label for="width">Ширина (мм):</label>
+                    <input type="number" id="width" placeholder="Введите ширину" value="600" min="50" max="2000">
+                </div>
+                
+                <div class="input-group">
+                    <label for="thickness">Толщина материала (мм):</label>
+                    <input type="number" id="thickness" placeholder="Введите толщину" value="10" min="1" max="100">
+                </div>
+                
+                <div class="input-group">
+                    <label for="view">Вид проекции:</label>
+                    <select id="view">
+                        <option value="front">Фронтальный вид</option>
+                        <option value="top">Вид сверху</option>
+                        <option value="side">Боковой вид</option>
+                    </select>
+                </div>
+                
+                <button id="generateSupportBtn">Сгенерировать чертеж</button>
+                
+                <div class="info-panel">
+                    <p><strong>Справка:</strong> Для точного расчета убедитесь, что толщина материала не превышает половину наименьшего размера конструкции.</p>
+                </div>
+            </div>
+            
+            <div class="drawing-container">
+                <h2>Чертеж металлической опоры</h2>
+                <canvas id="drawingCanvas" width="600" height="500"></canvas>
+                
+                <div class="dimensions">
+                    <div class="dimension-box">
+                        <div>Длина</div>
+                        <div class="dimension-value" id="lengthValue">1000 мм</div>
+                    </div>
+                    <div class="dimension-box">
+                        <div>Высота</div>
+                        <div class="dimension-value" id="heightValue">800 мм</div>
+                    </div>
+                    <div class="dimension-box">
+                        <div>Ширина</div>
+                        <div class="dimension-value" id="widthValue">600 мм</div>
+                    </div>
+                    <div class="dimension-box">
+                        <div>Толщина</div>
+                        <div class="dimension-value" id="thicknessValue">10 мм</div>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button id="downloadSupportBtn" class="download-btn">Скачать чертеж</button>
+                    <button id="resetSupportBtn" class="reset-btn">Сбросить параметры</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="pipe-tab">
+            <div class="input-panel">
+                <h2>Параметры трубы</h2>
+                <div class="input-group">
+                    <label for="radius">Радиус (мм):</label>
+                    <input type="number" id="radius" placeholder="Введите радиус" value="150" min="10" max="1000">
+                </div>
+                
+                <div class="input-group">
+                    <label for="pipeThickness">Толщина стенки (мм):</label>
+                    <input type="number" id="pipeThickness" placeholder="Введите толщину" value="10" min="1" max="100">
+                </div>
+                
+                <div class="input-group">
+                    <label for="pipeLength">Длина трубы (мм):</label>
+                    <input type="number" id="pipeLength" placeholder="Введите длину" value="1000" min="100" max="5000">
+                </div>
+                
+                <div class="input-group">
+                    <label for="pipeView">Вид проекции:</label>
+                    <select id="pipeView">
+                        <option value="front">Фронтальный вид</option>
+                        <option value="side">Боковой вид</option>
+                        <option value="section">Сечение</option>
+                    </select>
+                </div>
+                
+                <button id="generatePipeBtn">Сгенерировать чертеж</button>
+                
+                <div class="info-panel">
+                    <p><strong>Справка:</strong> Толщина стенки должна быть меньше радиуса трубы. Для длинных труб рекомендуется использовать дополнительные опоры.</p>
+                </div>
+            </div>
+            
+            <div class="drawing-container">
+                <h2>Чертеж трубы</h2>
+                <canvas id="pipeCanvas" width="600" height="500"></canvas>
+                
+                <div class="dimensions">
+                    <div class="dimension-box">
+                        <div>Радиус</div>
+                        <div class="dimension-value" id="radiusValue">150 мм</div>
+                    </div>
+                    <div class="dimension-box">
+                        <div>Толщина стенки</div>
+                        <div class="dimension-value" id="pipeThicknessValue">10 мм</div>
+                    </div>
+                    <div class="dimension-box">
+                        <div>Длина трубы</div>
+                        <div class="dimension-value" id="pipeLengthValue">1000 мм</div>
+                    </div>
+                    <div class="dimension-box">
+                        <div>Диаметр</div>
+                        <div class="dimension-value" id="diameterValue">300 мм</div>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button id="downloadPipeBtn" class="download-btn">Скачать чертеж</button>
+                    <button id="resetPipeBtn" class="reset-btn">Сбросить параметры</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Модальное окно для ввода названия файла -->
+        <div class="filename-modal" id="filenameModal">
+            <div class="modal-content">
+                <h3 class="modal-title">Введите название файла</h3>
+                <div class="input-group">
+                    <input type="text" id="filenameInput" placeholder="Введите название файла" value="чертеж">
+                </div>
+                <div class="modal-buttons">
+                    <button id="confirmDownloadBtn" class="download-btn">Скачать</button>
+                    <button id="cancelDownloadBtn" class="cancel-btn">Отмена</button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 Генератор чертежей металлоконструкций | Все расчеты приведены в миллиметрах</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById('drawingCanvas');
+            const ctx = canvas.getContext('2d');
+            const pipeCanvas = document.getElementById('pipeCanvas');
+            const pipeCtx = pipeCanvas.getContext('2d');
+            
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // Элементы модального окна
+            const filenameModal = document.getElementById('filenameModal');
+            const filenameInput = document.getElementById('filenameInput');
+            const confirmDownloadBtn = document.getElementById('confirmDownloadBtn');
+            const cancelDownloadBtn = document.getElementById('cancelDownloadBtn');
+            
+            // Переменные для хранения информации о текущем скачивании
+            let currentDownloadType = null; // 'support' или 'pipe'
+            
+            // Элементы для отображения значений
+            const lengthValue = document.getElementById('lengthValue');
+            const heightValue = document.getElementById('heightValue');
+            const widthValue = document.getElementById('widthValue');
+            const thicknessValue = document.getElementById('thicknessValue');
+            
+            const radiusValue = document.getElementById('radiusValue');
+            const pipeThicknessValue = document.getElementById('pipeThicknessValue');
+            const pipeLengthValue = document.getElementById('pipeLengthValue');
+            const diameterValue = document.getElementById('diameterValue');
+            
+            // Переключение вкладок
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(tc => tc.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // Функция для отрисовки опоры
+            function drawSupport(length, height, width, thickness, view = 'front') {
+                // Очищаем canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Масштабирование для правильного отображения
+                let scale, scaledLength, scaledHeight, scaledWidth, scaledThickness;
+                
+                if (view === 'front') {
+                    scale = Math.min(400 / length, 300 / height) * 0.8;
+                    scaledLength = length * scale;
+                    scaledHeight = height * scale;
+                    scaledWidth = width * scale;
+                    scaledThickness = thickness * scale;
+                } else if (view === 'top') {
+                    scale = Math.min(400 / length, 300 / width) * 0.8;
+                    scaledLength = length * scale;
+                    scaledHeight = width * scale; // Для вида сверху "высота" - это ширина
+                    scaledWidth = height * scale; // А "ширина" - это высота
+                    scaledThickness = thickness * scale;
+                } else if (view === 'side') {
+                    scale = Math.min(400 / width, 300 / height) * 0.8;
+                    scaledLength = width * scale; // Для бокового вида "длина" - это ширина
+                    scaledHeight = height * scale;
+                    scaledWidth = length * scale; // А "ширина" - это длина
+                    scaledThickness = thickness * scale;
+                }
+                
+                // Центрируем рисунок
+                const startX = (canvas.width - scaledLength) / 2;
+                const startY = (canvas.height - scaledHeight) / 2;
+                
+                // Рисуем основную пластину (белую)
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(startX, startY, scaledLength, scaledHeight);
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(startX, startY, scaledLength, scaledHeight);
+                
+                // Рисуем контур толщины материала
+                ctx.strokeStyle = '#3498db';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 3]);
+                
+                // Внутренний контур, показывающий толщину материала
+                const innerX = startX + scaledThickness;
+                const innerY = startY + scaledThickness;
+                const innerWidth = scaledLength - 2 * scaledThickness;
+                const innerHeight = scaledHeight - 2 * scaledThickness;
+                
+                ctx.strokeRect(innerX, innerY, innerWidth, innerHeight);
+                ctx.setLineDash([]);
+                
+                // Рисуем монтажные отверстия
+                ctx.fillStyle = '#f8f9fa';
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 1;
+                const holeRadius = scaledThickness * 1.2;
+                const holeOffset = scaledThickness * 2;
+                
+                // Отверстия в углах
+                ctx.beginPath();
+                ctx.arc(startX + holeOffset, startY + holeOffset, holeRadius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.arc(startX + scaledLength - holeOffset, startY + holeOffset, holeRadius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.arc(startX + holeOffset, startY + scaledHeight - holeOffset, holeRadius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.arc(startX + scaledLength - holeOffset, startY + scaledHeight - holeOffset, holeRadius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Добавляем текст с размерами
+                ctx.fillStyle = '#2c3e50';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                
+                if (view === 'front') {
+                    ctx.fillText(`Длина: ${length} мм`, startX + scaledLength/2, startY + scaledHeight + 30);
+                    ctx.fillText(`Высота: ${height} мм`, startX - 40, startY + scaledHeight/2);
+                    ctx.fillText(`Вид: Фронтальный`, startX + scaledLength/2, startY - 20);
+                } else if (view === 'top') {
+                    ctx.fillText(`Длина: ${length} мм`, startX + scaledLength/2, startY + scaledHeight + 30);
+                    ctx.fillText(`Ширина: ${width} мм`, startX - 40, startY + scaledHeight/2);
+                    ctx.fillText(`Вид: Сверху`, startX + scaledLength/2, startY - 20);
+                } else if (view === 'side') {
+                    ctx.fillText(`Ширина: ${width} мм`, startX + scaledLength/2, startY + scaledHeight + 30);
+                    ctx.fillText(`Высота: ${height} мм`, startX - 40, startY + scaledHeight/2);
+                    ctx.fillText(`Вид: Боковой`, startX + scaledLength/2, startY - 20);
+                }
+                
+                // Обновляем значения размеров
+                lengthValue.textContent = length + ' мм';
+                heightValue.textContent = height + ' мм';
+                widthValue.textContent = width + ' мм';
+                thicknessValue.textContent = thickness + ' мм';
+            }
+            
+            // Функция для отрисовки трубы
+            function drawPipe(radius, thickness, length, view = 'front') {
+                // Очищаем canvas
+                pipeCtx.clearRect(0, 0, pipeCanvas.width, pipeCanvas.height);
+                
+                const diameter = radius * 2;
+                
+                // Масштабирование для правильного отображения
+                let scale, scaledRadius, scaledThickness, scaledLength;
+                
+                if (view === 'front' || view === 'section') {
+                    scale = Math.min(350 / diameter, 300 / diameter) * 0.8;
+                    scaledRadius = radius * scale;
+                    scaledThickness = thickness * scale;
+                    scaledLength = length * scale;
+                } else if (view === 'side') {
+                    scale = Math.min(350 / diameter, 300 / length) * 0.8;
+                    scaledRadius = radius * scale;
+                    scaledThickness = thickness * scale;
+                    scaledLength = length * scale;
+                }
+                
+                // Центрируем рисунок
+                const centerX = pipeCanvas.width / 2;
+                const centerY = pipeCanvas.height / 2;
+                
+                if (view === 'front') {
+                    // Рисуем внешний контур трубы (вид спереди)
+                    pipeCtx.fillStyle = '#ffffff';
+                    pipeCtx.strokeStyle = '#2c3e50';
+                    pipeCtx.lineWidth = 2;
+                    
+                    // Внешняя окружность
+                    pipeCtx.beginPath();
+                    pipeCtx.arc(centerX, centerY, scaledRadius, 0, Math.PI * 2);
+                    pipeCtx.fill();
+                    pipeCtx.stroke();
+                    
+                    // Внутренняя окружность (отверстие трубы)
+                    pipeCtx.beginPath();
+                    pipeCtx.arc(centerX, centerY, scaledRadius - scaledThickness, 0, Math.PI * 2);
+                    pipeCtx.fill();
+                    pipeCtx.stroke();
+                    
+                    // Добавляем размерные линии для радиуса
+                    pipeCtx.strokeStyle = '#3498db';
+                    pipeCtx.lineWidth = 1;
+                    pipeCtx.setLineDash([5, 3]);
+                    
+                    // Линия радиуса
+                    pipeCtx.beginPath();
+                    pipeCtx.moveTo(centerX, centerY);
+                    pipeCtx.lineTo(centerX + scaledRadius, centerY);
+                    pipeCtx.stroke();
+                    
+                    // Линия толщины стенки
+                    pipeCtx.beginPath();
+                    pipeCtx.moveTo(centerX + scaledRadius - scaledThickness/2, centerY - scaledRadius - 20);
+                    pipeCtx.lineTo(centerX + scaledRadius - scaledThickness/2, centerY + scaledRadius + 20);
+                    pipeCtx.stroke();
+                    
+                    pipeCtx.setLineDash([]);
+                    
+                    // Добавляем текст с размерами
+                    pipeCtx.fillStyle = '#2c3e50';
+                    pipeCtx.font = '14px Arial';
+                    pipeCtx.textAlign = 'center';
+                    
+                    // Подпись радиуса
+                    pipeCtx.fillText(`Радиус: ${radius} мм`, centerX + scaledRadius/2, centerY - 15);
+                    
+                    // Подпись толщины стенки
+                    pipeCtx.fillText(`Толщина: ${thickness} мм`, centerX + scaledRadius + 30, centerY);
+                    
+                    // Подпись диаметра
+                    pipeCtx.fillText(`Диаметр: ${diameter} мм`, centerX, centerY - scaledRadius - 15);
+                    
+                    pipeCtx.fillText(`Вид: Фронтальный`, centerX, centerY + scaledRadius + 30);
+                    
+                } else if (view === 'side') {
+                    // Боковой вид трубы (прямоугольник)
+                    const startX = (pipeCanvas.width - scaledLength) / 2;
+                    const startY = centerY - scaledRadius;
+                    
+                    pipeCtx.fillStyle = '#ffffff';
+                    pipeCtx.strokeStyle = '#2c3e50';
+                    pipeCtx.lineWidth = 2;
+                    
+                    // Внешний прямоугольник
+                    pipeCtx.fillRect(startX, startY, scaledLength, scaledRadius * 2);
+                    pipeCtx.strokeRect(startX, startY, scaledLength, scaledRadius * 2);
+                    
+                    // Внутренний прямоугольник (отверстие)
+                    const innerY = startY + scaledThickness;
+                    const innerHeight = scaledRadius * 2 - scaledThickness * 2;
+                    
+                    pipeCtx.beginPath();
+                    pipeCtx.rect(startX, innerY, scaledLength, innerHeight);
+                    pipeCtx.fill();
+                    pipeCtx.stroke();
+                    
+                    // Добавляем текст с размерами
+                    pipeCtx.fillStyle = '#2c3e50';
+                    pipeCtx.font = '14px Arial';
+                    pipeCtx.textAlign = 'center';
+                    
+                    pipeCtx.fillText(`Длина: ${length} мм`, startX + scaledLength/2, startY + scaledRadius * 2 + 30);
+                    pipeCtx.fillText(`Диаметр: ${diameter} мм`, startX - 40, centerY);
+                    pipeCtx.fillText(`Вид: Боковой`, startX + scaledLength/2, startY - 20);
+                    
+                } else if (view === 'section') {
+                    // Сечение трубы
+                    pipeCtx.fillStyle = '#ffffff';
+                    pipeCtx.strokeStyle = '#2c3e50';
+                    pipeCtx.lineWidth = 2;
+                    
+                    // Внешняя окружность
+                    pipeCtx.beginPath();
+                    pipeCtx.arc(centerX, centerY, scaledRadius, 0, Math.PI * 2);
+                    pipeCtx.fill();
+                    pipeCtx.stroke();
+                    
+                    // Внутренняя окружность (отверстие трубы)
+                    pipeCtx.beginPath();
+                    pipeCtx.arc(centerX, centerY, scaledRadius - scaledThickness, 0, Math.PI * 2);
+                    pipeCtx.fill();
+                    pipeCtx.stroke();
+                    
+                    // Линия сечения
+                    pipeCtx.beginPath();
+                    pipeCtx.moveTo(centerX - scaledRadius - 10, centerY);
+                    pipeCtx.lineTo(centerX + scaledRadius + 10, centerY);
+                    pipeCtx.strokeStyle = '#e74c3c';
+                    pipeCtx.lineWidth = 2;
+                    pipeCtx.stroke();
+                    
+                    // Добавляем штриховку материала
+                    pipeCtx.fillStyle = '#e8f4fc';
+                    pipeCtx.beginPath();
+                    pipeCtx.arc(centerX, centerY, scaledRadius, 0, Math.PI * 2);
+                    pipeCtx.arc(centerX, centerY, scaledRadius - scaledThickness, Math.PI * 2, 0, true);
+                    pipeCtx.fill();
+                    
+                    // Добавляем текст с размерами
+                    pipeCtx.fillStyle = '#2c3e50';
+                    pipeCtx.font = '14px Arial';
+                    pipeCtx.textAlign = 'center';
+                    
+                    pipeCtx.fillText(`Радиус: ${radius} мм`, centerX + scaledRadius/2, centerY - 15);
+                    pipeCtx.fillText(`Толщина: ${thickness} мм`, centerX + scaledRadius + 30, centerY);
+                    pipeCtx.fillText(`Сечение трубы`, centerX, centerY + scaledRadius + 30);
+                }
+                
+                // Обновляем значения размеров
+                radiusValue.textContent = radius + ' мм';
+                pipeThicknessValue.textContent = thickness + ' мм';
+                pipeLengthValue.textContent = length + ' мм';
+                diameterValue.textContent = diameter + ' мм';
+            }
+            
+            // Функция для скачивания чертежа
+            function downloadCanvas(canvas, filename) {
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            // Функция сброса параметров опоры
+            function resetSupportParams() {
+                document.getElementById('length').value = 1000;
+                document.getElementById('height').value = 800;
+                document.getElementById('width').value = 600;
+                document.getElementById('thickness').value = 10;
+                document.getElementById('view').value = 'front';
+                
+                drawSupport(1000, 800, 600, 10, 'front');
+            }
+            
+            // Функция сброса параметров трубы
+            function resetPipeParams() {
+                document.getElementById('radius').value = 150;
+                document.getElementById('pipeThickness').value = 10;
+                document.getElementById('pipeLength').value = 1000;
+                document.getElementById('pipeView').value = 'front';
+                
+                drawPipe(150, 10, 1000, 'front');
+            }
+            
+            // Функция показа модального окна
+            function showFilenameModal(type) {
+                currentDownloadType = type;
+                
+                // Установка значения по умолчанию в зависимости от типа
+                if (type === 'support') {
+                    filenameInput.value = 'чертеж_опоры';
+                } else if (type === 'pipe') {
+                    filenameInput.value = 'чертеж_трубы';
+                }
+                
+                filenameModal.classList.add('active');
+                filenameInput.focus();
+            }
+            
+            // Функция скрытия модального окна
+            function hideFilenameModal() {
+                filenameModal.classList.remove('active');
+                currentDownloadType = null;
+            }
+            
+            // Обработчик подтверждения скачивания
+            confirmDownloadBtn.addEventListener('click', function() {
+                const filename = filenameInput.value.trim();
+                
+                if (filename) {
+                    if (currentDownloadType === 'support') {
+                        downloadCanvas(canvas, filename + '.png');
+                    } else if (currentDownloadType === 'pipe') {
+                        downloadCanvas(pipeCanvas, filename + '.png');
+                    }
+                }
+                
+                hideFilenameModal();
+            });
+            
+            // Обработчик отмены скачивания
+            cancelDownloadBtn.addEventListener('click', hideFilenameModal);
+            
+            // Закрытие модального окна при клике вне его
+            filenameModal.addEventListener('click', function(e) {
+                if (e.target === filenameModal) {
+                    hideFilenameModal();
+                }
+            });
+            
+            // Закрытие модального окна при нажатии Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && filenameModal.classList.contains('active')) {
+                    hideFilenameModal();
+                }
+            });
+            
+            // Инициализация чертежей при загрузке
+            const initialLength = parseInt(document.getElementById('length').value);
+            const initialHeight = parseInt(document.getElementById('height').value);
+            const initialWidth = parseInt(document.getElementById('width').value);
+            const initialThickness = parseInt(document.getElementById('thickness').value);
+            const initialView = document.getElementById('view').value;
+            
+            const initialRadius = parseInt(document.getElementById('radius').value);
+            const initialPipeThickness = parseInt(document.getElementById('pipeThickness').value);
+            const initialPipeLength = parseInt(document.getElementById('pipeLength').value);
+            const initialPipeView = document.getElementById('pipeView').value;
+            
+            drawSupport(initialLength, initialHeight, initialWidth, initialThickness, initialView);
+            drawPipe(initialRadius, initialPipeThickness, initialPipeLength, initialPipeView);
+            
+            // Обработчики нажатия на кнопки
+            document.getElementById('generateSupportBtn').addEventListener('click', function() {
+                const length = parseInt(document.getElementById('length').value);
+                const height = parseInt(document.getElementById('height').value);
+                const width = parseInt(document.getElementById('width').value);
+                const thickness = parseInt(document.getElementById('thickness').value);
+                const view = document.getElementById('view').value;
+                
+                // Проверка введенных данных
+                if (isNaN(length) || isNaN(height) || isNaN(width) || isNaN(thickness) ||
+                    length <= 0 || height <= 0 || width <= 0 || thickness <= 0) {
+                    alert('Пожалуйста, введите корректные значения (положительные числа)');
+                    return;
+                }
+                
+                if (thickness >= Math.min(length, height, width) / 2) {
+                    alert('Толщина материала слишком большая для указанных размеров конструкции');
+                    return;
+                }
+                
+                drawSupport(length, height, width, thickness, view);
+            });
+            
+            document.getElementById('generatePipeBtn').addEventListener('click', function() {
+                const radius = parseInt(document.getElementById('radius').value);
+                const thickness = parseInt(document.getElementById('pipeThickness').value);
+                const length = parseInt(document.getElementById('pipeLength').value);
+                const view = document.getElementById('pipeView').value;
+                
+                // Проверка введенных данных
+                if (isNaN(radius) || isNaN(thickness) || isNaN(length) ||
+                    radius <= 0 || thickness <= 0 || length <= 0 || thickness >= radius) {
+                    alert('Пожалуйста, введите корректные значения (положительные числа, толщина должна быть меньше радиуса)');
+                    return;
+                }
+                
+                drawPipe(radius, thickness, length, view);
+            });
+            
+            // Обработчики для кнопок скачивания
+            document.getElementById('downloadSupportBtn').addEventListener('click', function() {
+                showFilenameModal('support');
+            });
+            
+            document.getElementById('downloadPipeBtn').addEventListener('click', function() {
+                showFilenameModal('pipe');
+            });
+            
+            // Обработчики для кнопок сброса
+            document.getElementById('resetSupportBtn').addEventListener('click', resetSupportParams);
+            document.getElementById('resetPipeBtn').addEventListener('click', resetPipeParams);
+            
+            // Обработчики изменения вида
+            document.getElementById('view').addEventListener('change', function() {
+                const length = parseInt(document.getElementById('length').value);
+                const height = parseInt(document.getElementById('height').value);
+                const width = parseInt(document.getElementById('width').value);
+                const thickness = parseInt(document.getElementById('thickness').value);
+                const view = this.value;
+                
+                drawSupport(length, height, width, thickness, view);
+            });
+            
+            document.getElementById('pipeView').addEventListener('change', function() {
+                const radius = parseInt(document.getElementById('radius').value);
+                const thickness = parseInt(document.getElementById('pipeThickness').value);
+                const length = parseInt(document.getElementById('pipeLength').value);
+                const view = this.value;
+                
+                drawPipe(radius, thickness, length, view);
+            });
+        });
+    </script>
+</body>
+</html>
